@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XL Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0c10;--sidebar:#13141a;--surface:#1a1c24;--surface2:#21232e;
+  --border:#2a2d3a;--text:#f0f0f5;--muted:#6b6e80;--hint:#3d4055;
+  --t1:#6ee7b7;--t2:#93c5fd;--t3:#f9a8d4;--yellow:#fde68a;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh}
+
+/* ── SIDEBAR ── */
+.sidebar{width:210px;min-width:210px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid var(--border)}
+.logo-badge{display:inline-flex;align-items:center;gap:9px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 12px}
+.logo-icon{width:26px;height:26px;background:linear-gradient(135deg,#6ee7b7,#3b82f6);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.logo-text{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--text)}
+.sidebar-section{padding:20px 12px 6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--hint)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:2px 8px;border-radius:8px;cursor:pointer;transition:background .15s;color:var(--muted);font-size:13px;font-weight:500;text-decoration:none}
+.nav-item:hover{background:var(--surface);color:var(--text)}
+.nav-item.active{background:var(--surface2);color:var(--text)}
+.nav-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-1{background:var(--t1)}.dot-2{background:var(--t2)}.dot-3{background:var(--t3)}
+.sidebar-footer{margin-top:auto;padding:14px 12px;border-top:1px solid var(--border)}
+.footer-note{font-size:10px;color:var(--hint);line-height:1.6;font-family:'JetBrains Mono',monospace}
+.footer-note span{color:var(--t1);font-weight:700}
+
+/* ── TOPBAR ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:54px;min-height:54px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 26px;background:var(--sidebar)}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.topbar-title{font-size:14px;font-weight:700;color:var(--text)}
+.topbar-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.status-pill{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:11px;color:var(--t1);font-weight:600}
+.pulse{width:6px;height:6px;background:var(--t1);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── PAGES ── */
+.page{display:none;flex:1;overflow-y:auto;padding:28px 26px 40px}
+.page.active{display:block}
+.page::-webkit-scrollbar{width:4px}
+.page::-webkit-scrollbar-track{background:transparent}
+.page::-webkit-scrollbar-thumb{background:var(--hint);border-radius:4px}
+
+/* ── DASHBOARD ── */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:14px}
+.stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.si-1{background:#0d2e20}.si-2{background:#0f2040}.si-3{background:#2e0f22}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:3px;font-weight:500}
+.stat-val{font-size:15px;font-weight:700;color:var(--text)}
+.section-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.tool-grid{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;display:grid;grid-template-columns:46px 1fr auto;gap:16px;align-items:center;text-decoration:none;color:inherit;transition:border-color .2s,background .2s;cursor:pointer;position:relative;overflow:hidden}
+.tool-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;opacity:0;transition:opacity .2s}
+.tc-1::after{background:var(--t1)}.tc-2::after{background:var(--t2)}.tc-3::after{background:var(--t3)}
+.tool-card:hover{background:var(--surface2);border-color:#3d4055}
+.tool-card:hover::after{opacity:1}
+.tc-avatar{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tca-1{background:#0d2e20}.tca-2{background:#0f2040}.tca-3{background:#2e0f22}
+.tc-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px}
+.tc-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.tc-tags{display:flex;flex-direction:column;gap:5px;align-items:flex-end}
+.tc-tag{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;border-radius:6px;white-space:nowrap;font-weight:700}
+.tt-1{background:#0d2e20;color:var(--t1)}.tt-2{background:#0f2040;color:var(--t2)}.tt-3{background:#2e0f22;color:var(--t3)}
+.tc-arrow{font-size:15px;color:var(--hint);margin-top:4px;text-align:right}
+.info-strip{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.strip-text{font-size:11px;color:var(--muted);line-height:1.5}
+.strip-text strong{color:var(--yellow);font-weight:600}
+
+/* ── SHARED TOOL PAGE STYLES ── */
+.tool-head{margin-bottom:6px}
+.tool-head h2{font-size:20px;font-weight:800;color:var(--text);margin-bottom:5px;letter-spacing:-0.4px}
+.tool-head p{font-size:12px;color:var(--muted);line-height:1.7;max-width:560px}
+
+.tool-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.tool-stat{background:linear-gradient(135deg,var(--surface) 0%,var(--surface2) 100%);border:1px solid var(--border);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+.tool-stat::before{content:'';position:absolute;top:-1px;left:16px;right:16px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+.tool-stat-n{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;line-height:1;color:var(--text)}
+.tool-stat-n.green{color:var(--t1)}
+.tool-stat-n.pink{color:var(--t3)}
+.tool-stat-n.blue{color:var(--t2)}
+.tool-stat-l{font-size:11px;color:var(--muted);margin-top:5px;font-weight:500;letter-spacing:.3px}
+
+.tool-bar{height:6px;background:var(--surface2);border-radius:99px;margin-bottom:18px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+.tool-bar-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#34d399,var(--t1),#6ee7b7);background-size:200% 100%;transition:width .4s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px rgba(110,231,183,.5);animation:shimmer 2s linear infinite}
+.tool-bar-fill.blue{background:linear-gradient(90deg,#60a5fa,var(--t2),#93c5fd);box-shadow:0 0 8px rgba(147,197,253,.5)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.tool-drop{border:1.5px dashed var(--border);border-radius:16px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;background:linear-gradient(160deg,var(--surface) 0%,rgba(26,28,36,0) 100%);transition:all .2s ease;position:relative;overflow:hidden}
+.tool-drop::before{content:'';position:absolute;inset:0;border-radius:16px;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(110,231,183,.04),transparent);pointer-events:none}
+.tool-drop:hover,.tool-drop.over{background:var(--surface2);border-color:var(--t1);border-style:solid;box-shadow:0 0 0 3px rgba(110,231,183,.08)}
+.tool-drop.blue-hover:hover,.tool-drop.blue-hover.over{border-color:var(--t2);box-shadow:0 0 0 3px rgba(147,197,253,.08)}
+.tool-drop input[type=file]{display:none}
+.tool-drop p{font-size:15px;font-weight:700;margin-bottom:5px;color:var(--text);letter-spacing:-.2px}
+.tool-drop span{font-size:12px;color:var(--muted)}
+.drop-chosen{font-size:12px;color:var(--t1);margin-top:8px;font-weight:600;min-height:18px}
+
+.drop-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}
+
+.tool-actions{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+.tool-btn{font-size:12px;font-weight:600;padding:8px 16px;cursor:pointer;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);display:inline-flex;align-items:center;gap:7px;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s;letter-spacing:.1px}
+.tool-btn:hover:not(:disabled){background:var(--surface2);border-color:#3d4055;transform:translateY(-1px)}
+.tool-btn:active:not(:disabled){transform:translateY(0)}
+.tool-btn:disabled{opacity:.35;cursor:default}
+.tool-btn.primary{background:linear-gradient(135deg,#0a2a1c,#0d3322);border-color:rgba(110,231,183,.4);color:var(--t1)}
+.tool-btn.primary:hover:not(:disabled){background:linear-gradient(135deg,#0d3322,#113d28);border-color:var(--t1);box-shadow:0 0 14px rgba(110,231,183,.15)}
+.tool-btn.primary-blue{background:linear-gradient(135deg,#0a1a2e,#0d2040);border-color:rgba(147,197,253,.4);color:var(--t2)}
+.tool-btn.primary-blue:hover:not(:disabled){background:linear-gradient(135deg,#0d2040,#112850);border-color:var(--t2);box-shadow:0 0 14px rgba(147,197,253,.15)}
+
+.tool-file-list{display:flex;flex-direction:column;gap:6px;margin-top:6px}
+.tool-file-row{display:flex;align-items:center;gap:10px;padding:11px 16px;background:linear-gradient(90deg,var(--surface) 0%,var(--surface2) 100%);border:1px solid var(--border);border-radius:12px;transition:border-color .15s;position:relative;overflow:hidden}
+.tool-file-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border);transition:background .2s}
+.tool-file-row:has(.b-done)::before{background:var(--t1);box-shadow:0 0 6px rgba(110,231,183,.5)}
+.tool-file-row:has(.b-working)::before{background:var(--t2);box-shadow:0 0 6px rgba(147,197,253,.5)}
+.tool-file-row:has(.b-error)::before{background:var(--t3);box-shadow:0 0 6px rgba(249,168,212,.5)}
+.tool-fname{flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);margin-left:4px}
+.tool-fsize{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--hint);min-width:55px;text-align:right}
+.tool-finfo{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);min-width:130px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tool-badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
+.b-pending{background:rgba(61,64,85,.4);color:var(--muted);border:1px solid var(--border)}
+.b-working{background:rgba(15,32,64,.7);color:var(--t2);border:1px solid rgba(147,197,253,.25);animation:badge-pulse 1.2s ease-in-out infinite}
+@keyframes badge-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.b-done{background:rgba(13,46,32,.8);color:var(--t1);border:1px solid rgba(110,231,183,.25)}
+.b-error{background:rgba(46,15,34,.8);color:var(--t3);border:1px solid rgba(249,168,212,.25)}
+.tool-dl{font-size:11px;font-weight:600;padding:5px 12px;cursor:pointer;background:rgba(13,46,32,.6);border:1px solid rgba(110,231,183,.3);border-radius:8px;color:var(--t1);white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif;transition:all .15s}
+.tool-dl:hover{background:rgba(13,46,32,.9);border-color:var(--t1);box-shadow:0 0 8px rgba(110,231,183,.2)}
+
+.tool-status{margin-top:12px;font-size:13px;font-weight:600;min-height:22px;font-family:'JetBrains Mono',monospace}
+.tool-status.ok{color:var(--t1)}.tool-status.err{color:var(--t3)}.tool-status.info{color:var(--t2)}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-badge">
+      <div class="logo-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0b0c10" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </div>
+      <span class="logo-text">XL Toolkit</span>
+    </div>
+  </div>
+  <div class="sidebar-section">Tools</div>
+  <div class="nav-item active" id="nav-dashboard" onclick="showPage('dashboard')"><span class="nav-dot" style="background:var(--hint)"></span>Dashboard</div>
+  <div class="nav-item" id="nav-groups"    onclick="showPage('groups')"><span class="nav-dot dot-1"></span>Groups</div>
+  <div class="nav-item" id="nav-members"   onclick="showPage('members')"><span class="nav-dot dot-2"></span>Members</div>
+  <div class="nav-item" id="nav-repair"    onclick="showPage('repair')"><span class="nav-dot dot-3"></span>Repair Files</div>
+  <div class="sidebar-section" style="margin-top:10px">System</div>
+  <div class="nav-item" style="cursor:default;pointer-events:none">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Local only
+  </div>
+  <div class="nav-item" style="cursor:default;pointer-events:none">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    No upload
+  </div>
+  <div class="sidebar-footer">
+    <div class="footer-note"><span>v1.5</span> — Browser-only.<br>Zero server contact.</div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span class="topbar-meta">3 tools</span>
+      <div class="status-pill"><span class="pulse"></span>Ready</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-icon si-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+        <div><div class="stat-label">Groups</div><div class="stat-val">Region split</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></div>
+        <div><div class="stat-label">Members</div><div class="stat-val">XML split</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon si-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f9a8d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <div><div class="stat-label">Repair Files</div><div class="stat-val">Named ranges</div></div>
+      </div>
+    </div>
+    <div class="section-label">Select a tool</div>
+    <div class="tool-grid">
+      <div class="tool-card tc-1" onclick="showPage('groups')">
+        <div class="tc-avatar tca-1"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+        <div><div class="tc-title">Groups</div><div class="tc-desc">Splits rows by Region into separate .xlsx files — styles, borders and fonts preserved via ExcelJS.</div></div>
+        <div class="tc-tags"><span class="tc-tag tt-1">ExcelJS</span><span class="tc-tag tt-1">ZIP</span><div class="tc-arrow">→</div></div>
+      </div>
+      <div class="tool-card tc-2" onclick="showPage('members')">
+        <div class="tc-avatar tca-2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#93c5fd" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></div>
+        <div><div class="tc-title">Members</div><div class="tc-desc">Raw XML splitter — all template sheets preserved. Input shared strings carried over so cell values survive intact.</div></div>
+        <div class="tc-tags"><span class="tc-tag tt-2">Raw XML</span><span class="tc-tag tt-2">ZIP</span><div class="tc-arrow">→</div></div>
+      </div>
+      <div class="tool-card tc-3" onclick="showPage('repair')">
+        <div class="tc-avatar tca-3"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f9a8d4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
+        <div><div class="tc-title">Repair Files</div><div class="tc-desc">Removes broken named ranges from workbook.xml. Bulk repair with ZIP export.</div></div>
+        <div class="tc-tags"><span class="tc-tag tt-3">Bulk</span><span class="tc-tag tt-3">ZIP</span><div class="tc-arrow">→</div></div>
+      </div>
+    </div>
+    <div class="info-strip">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fde68a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div class="strip-text"><strong>100% local.</strong> Files never leave your browser — no server, no tracking.</div>
+    </div>
+  </div>
+
+  <!-- GROUPS -->
+  <div class="page" id="page-groups">
+    <div class="tool-head">
+      <h2>Groups — Region Split</h2>
+      <p>Upload your input .xlsx and template file. Each region gets its own .xlsx — cell values, fonts, fills, borders, alignment and conditional formatting all preserved.</p>
+    </div>
+    <div class="drop-pair">
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">Step 01 · Input Excel</div>
+        <div class="tool-drop blue-hover" id="g-input-zone" onclick="document.getElementById('g-inputFile').click()">
+          <input type="file" id="g-inputFile" accept=".xlsx,.xls">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p style="font-size:13px">Input .xlsx</p>
+          <span>click or drag</span>
+          <div class="drop-chosen" id="g-inputName"></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">Step 02 · Template File</div>
+        <div class="tool-drop blue-hover" id="g-tmpl-zone" onclick="document.getElementById('g-templateFile').click()">
+          <input type="file" id="g-templateFile" accept=".xlsx,.xls">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px"><rect x="14" y="2" width="8" height="8"/><rect x="2" y="14" width="8" height="8"/><path d="M6 2v4a4 4 0 0 0 4 4h4"/></svg>
+          <p style="font-size:13px">Template .xlsx</p>
+          <span>click or drag</span>
+          <div class="drop-chosen" id="g-templateName"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tool-bar" style="margin-top:16px"><div class="tool-bar-fill blue" id="g-bar-fill"></div></div>
+    <div class="tool-actions">
+      <button class="tool-btn primary-blue" id="g-spreadBtn" onclick="gSpreadExcel()" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Split into groups
+      </button>
+      <button class="tool-btn" id="g-clearBtn" onclick="gClear()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Clear
+      </button>
+    </div>
+    <div class="tool-file-list" id="g-file-list"></div>
+    <div class="tool-status" id="g-status"></div>
+  </div>
+
+  <!-- MEMBERS -->
+  <div class="page" id="page-members">
+    <div class="tool-head">
+      <h2>Members — XML Split</h2>
+      <p>Upload input + template. The template provides <strong style="color:var(--t2)">all sheets</strong> (sheet2, sheet3 …) — structure, rels and Content_Types. Sheet1 data, styles and shared strings come from the input file so cell colours, fonts and fills are fully preserved.</p>
+    </div>
+    <div class="drop-pair">
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">Step 01 · Input Excel</div>
+        <div class="tool-drop" id="m-input-zone" onclick="document.getElementById('m-inputFile').click()">
+          <input type="file" id="m-inputFile" accept=".xlsx">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p style="font-size:13px">Input .xlsx</p>
+          <span>click or drag</span>
+          <div class="drop-chosen" id="m-inputName"></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px">Step 02 · Template File</div>
+        <div class="tool-drop" id="m-tmpl-zone" onclick="document.getElementById('m-templateFile').click()">
+          <input type="file" id="m-templateFile" accept=".xlsx">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px"><rect x="14" y="2" width="8" height="8"/><rect x="2" y="14" width="8" height="8"/><path d="M6 2v4a4 4 0 0 0 4 4h4"/></svg>
+          <p style="font-size:13px">Template .xlsx</p>
+          <span>click or drag</span>
+          <div class="drop-chosen" id="m-templateName"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tool-bar" style="margin-top:16px"><div class="tool-bar-fill" id="m-bar-fill"></div></div>
+    <div class="tool-actions">
+      <button class="tool-btn primary" id="m-spreadBtn" onclick="mSpreadExcel()" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/></svg>
+        Spread members
+      </button>
+      <button class="tool-btn" id="m-clearBtn" onclick="mClear()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Clear
+      </button>
+    </div>
+    <div class="tool-file-list" id="m-file-list"></div>
+    <div class="tool-status" id="m-status"></div>
+  </div>
+
+  <!-- REPAIR FILES -->
+  <div class="page" id="page-repair">
+    <div class="tool-head">
+      <h2>Repair Files</h2>
+      <p>Fixes the "Removed Records: Named range" warning by surgically removing broken external named ranges — all cell data, colours and conditional formatting are fully preserved.</p>
+    </div>
+    <div class="tool-stats">
+      <div class="tool-stat"><div class="tool-stat-n" id="s-total">0</div><div class="tool-stat-l">files added</div></div>
+      <div class="tool-stat"><div class="tool-stat-n green" id="s-done">0</div><div class="tool-stat-l">repaired</div></div>
+      <div class="tool-stat"><div class="tool-stat-n pink" id="s-fail">0</div><div class="tool-stat-l">failed</div></div>
+    </div>
+    <div class="tool-bar"><div class="tool-bar-fill" id="rp-bar-fill"></div></div>
+    <div class="tool-drop" id="rp-drop" onclick="document.getElementById('rp-fi').click()">
+      <input type="file" id="rp-fi" accept=".xlsx" multiple>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 10px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <p>Drop .xlsx files here</p>
+      <span>or click to browse — multiple files supported</span>
+    </div>
+    <div class="tool-actions">
+      <button class="tool-btn primary" id="rp-btn-repair" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Repair all
+      </button>
+      <button class="tool-btn" id="rp-btn-dl" disabled>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download all repaired
+      </button>
+      <button class="tool-btn" id="rp-btn-clear">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        Clear
+      </button>
+    </div>
+    <div class="tool-file-list" id="rp-file-list"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+// ─────────────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────────────
+const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+// ─────────────────────────────────────────────────────
+// PAGE ROUTING
+// ─────────────────────────────────────────────────────
+const PAGE_TITLES = { dashboard:'Dashboard', groups:'Groups', members:'Members', repair:'Repair Files' };
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[name];
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const nav = document.getElementById('nav-' + name);
+  if (nav) nav.classList.add('active');
+}
+
+// ─────────────────────────────────────────────────────
+// SHARED HELPERS
+// ─────────────────────────────────────────────────────
+function fmtSize(b) { return b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB'; }
+
+function dlBlob(blob, name) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;';
+    const modal = document.createElement('div');
+    modal.style.cssText = 'background:#1a1c24;border:1px solid #3d4055;border-radius:16px;padding:28px 28px 22px;width:420px;max-width:90vw;box-shadow:0 24px 60px rgba(0,0,0,.6);font-family:\'Plus Jakarta Sans\',sans-serif;';
+    const ext = name.split('.').pop().toLowerCase();
+    const icon = ext === 'zip' ? '🗜️' : '📄';
+    modal.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+        <div style="width:36px;height:36px;background:#0d2e20;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px">${icon}</div>
+        <div><div style="font-size:15px;font-weight:700;color:#f0f0f5">Save File</div><div style="font-size:11px;color:#6b6e80;margin-top:1px">Confirm filename before downloading</div></div>
+      </div>
+      <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#6b6e80;margin-bottom:6px">Filename</label>
+      <input id="dl-name-input" type="text" value="${name}" style="width:100%;padding:10px 14px;background:#0b0c10;border:1px solid #3d4055;border-radius:10px;color:#f0f0f5;font-size:13px;font-weight:500;font-family:'Plus Jakarta Sans',sans-serif;outline:none;box-sizing:border-box;" />
+      <div style="font-size:11px;color:#3d4055;margin-top:8px;line-height:1.6">💡 To choose the <strong style="color:#6b6e80">save folder</strong>, enable <em>"Ask where to save"</em> in your browser's download settings.</div>
+      <div style="display:flex;gap:8px;margin-top:20px;justify-content:flex-end">
+        <button id="dl-cancel-btn" style="padding:9px 18px;background:#21232e;border:1px solid #2a2d3a;border-radius:10px;color:#6b6e80;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">Cancel</button>
+        <button id="dl-save-btn" style="padding:9px 18px;background:linear-gradient(135deg,#0a2a1c,#0d3322);border:1px solid rgba(110,231,183,.4);border-radius:10px;color:#6ee7b7;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;">⬇ Download</button>
+      </div>`;
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    const input = modal.querySelector('#dl-name-input');
+    input.focus(); input.select();
+    input.addEventListener('focus', () => input.style.borderColor = '#6ee7b7');
+    input.addEventListener('blur',  () => input.style.borderColor = '#3d4055');
+    function doSave() {
+      const finalName = input.value.trim() || name;
+      document.body.removeChild(overlay);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = finalName;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+      resolve();
+    }
+    function doCancel() { document.body.removeChild(overlay); resolve(); }
+    modal.querySelector('#dl-save-btn').addEventListener('click', doSave);
+    modal.querySelector('#dl-cancel-btn').addEventListener('click', doCancel);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') doSave(); if (e.key === 'Escape') doCancel(); });
+    overlay.addEventListener('click', e => { if (e.target === overlay) doCancel(); });
+  });
+}
+
+function bindDropZone(zoneId, inputId, chosenId, cb) {
+  const zone = document.getElementById(zoneId);
+  const inp  = document.getElementById(inputId);
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('over');
+    if (e.dataTransfer.files.length) {
+      if (chosenId) document.getElementById(chosenId).textContent = '✓ ' + e.dataTransfer.files[0].name;
+      if (cb) cb(e.dataTransfer.files);
+    }
+  });
+  inp.addEventListener('change', function() {
+    if (this.files[0] && chosenId) document.getElementById(chosenId).textContent = '✓ ' + this.files[0].name;
+    if (cb) cb(this.files);
+  });
+}
+
+function addFileRow(containerId, name, size, status, info, dlCallback) {
+  const sc = { pending:'b-pending', working:'b-working', done:'b-done', error:'b-error' }[status];
+  const sl = { pending:'Pending', working:'Working…', done:'Done', error:'Error' }[status];
+  const row = document.createElement('div');
+  row.className = 'tool-file-row';
+  row.innerHTML = `
+    <span class="tool-fname" title="${name}">📄 ${name}</span>
+    <span class="tool-fsize">${fmtSize(size)}</span>
+    ${info ? `<span class="tool-finfo" title="${info}">${info}</span>` : ''}
+    <span class="tool-badge ${sc}">${sl}</span>
+    ${status === 'done' ? `<button class="tool-dl">↓ Save</button>` : ''}`;
+  if (status === 'done' && dlCallback) row.querySelector('.tool-dl').addEventListener('click', dlCallback);
+  document.getElementById(containerId).appendChild(row);
+}
+
+// ─────────────────────────────────────────────────────
+// GROUPS
+// ─────────────────────────────────────────────────────
+bindDropZone('g-input-zone', 'g-inputFile', 'g-inputName', () => gCheckReady());
+bindDropZone('g-tmpl-zone',  'g-templateFile', 'g-templateName', () => gCheckReady());
+
+function gCheckReady() {
+  document.getElementById('g-spreadBtn').disabled =
+    !(document.getElementById('g-inputFile').files[0] && document.getElementById('g-templateFile').files[0]);
+}
+function gClear() {
+  ['g-inputFile','g-templateFile'].forEach(id => document.getElementById(id).value = '');
+  ['g-inputName','g-templateName'].forEach(id => document.getElementById(id).textContent = '');
+  document.getElementById('g-file-list').innerHTML = '';
+  document.getElementById('g-status').textContent = '';
+  document.getElementById('g-bar-fill').style.width = '0%';
+  document.getElementById('g-spreadBtn').disabled = true;
+}
+function gSetStatus(msg, type) {
+  const el = document.getElementById('g-status');
+  el.textContent = msg; el.className = 'tool-status ' + (type || 'info');
+}
+
+async function gSpreadExcel() {
+  const inputFile    = document.getElementById('g-inputFile').files[0];
+  const templateFile = document.getElementById('g-templateFile').files[0];
+  if (!inputFile || !templateFile) { alert('Upload both files'); return; }
+  const btn = document.getElementById('g-spreadBtn');
+  btn.disabled = true;
+  document.getElementById('g-file-list').innerHTML = '';
+  gSetStatus('Processing...', 'info');
+  const barFill = document.getElementById('g-bar-fill');
+  barFill.style.width = '5%';
+  try {
+    const inputBuffer    = await inputFile.arrayBuffer();
+    const templateBuffer = await templateFile.arrayBuffer();
+    const inputWorkbook  = new ExcelJS.Workbook();
+    await inputWorkbook.xlsx.load(inputBuffer);
+    const inputSheet = inputWorkbook.worksheets[0];
+    barFill.style.width = '20%';
+
+    let regionColumn = -1;
+    inputSheet.getRow(1).eachCell((cell, col) => {
+      if (String(cell.value).trim().toLowerCase() === 'region') regionColumn = col;
+    });
+    if (regionColumn === -1) { gSetStatus('Error: Region column not found', 'err'); btn.disabled = false; return; }
+
+    const groupedData = {};
+    inputSheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return;
+      const region = row.getCell(regionColumn).text || 'Unknown';
+      if (!groupedData[region]) groupedData[region] = [];
+      groupedData[region].push(rowNumber);
+    });
+
+    const regions = Object.keys(groupedData);
+    gSetStatus('Found ' + regions.length + ' region(s)...', 'info');
+    barFill.style.width = '35%';
+    const zip = new JSZip();
+
+    for (let ri = 0; ri < regions.length; ri++) {
+      const region   = regions[ri];
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(templateBuffer.slice(0));
+      const sheet = workbook.worksheets[0];
+
+      if (inputSheet.conditionalFormattings)
+        sheet.conditionalFormattings = JSON.parse(JSON.stringify(inputSheet.conditionalFormattings));
+      sheet.properties = JSON.parse(JSON.stringify(inputSheet.properties));
+      sheet.pageSetup  = JSON.parse(JSON.stringify(inputSheet.pageSetup));
+      inputSheet.columns.forEach((col, idx) => { sheet.getColumn(idx + 1).width = col.width; });
+
+      let outputRow = 9;
+      for (const rowNumber of groupedData[region]) {
+        const sourceRow = inputSheet.getRow(rowNumber);
+        const targetRow = sheet.getRow(outputRow);
+        sourceRow.eachCell({ includeEmpty: true }, (cell, col) => {
+          const tc = targetRow.getCell(col);
+          tc.value = cell.value; tc.numFmt = cell.numFmt;
+          if (cell.font)       tc.font       = JSON.parse(JSON.stringify(cell.font));
+          if (cell.fill)       tc.fill       = JSON.parse(JSON.stringify(cell.fill));
+          if (cell.border)     tc.border     = JSON.parse(JSON.stringify(cell.border));
+          if (cell.alignment)  tc.alignment  = JSON.parse(JSON.stringify(cell.alignment));
+          if (cell.protection) tc.protection = JSON.parse(JSON.stringify(cell.protection));
+        });
+        targetRow.height = sourceRow.height;
+        outputRow++;
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      zip.file(region + '.xlsx', new Blob([buffer], { type: XLSX_MIME }));
+      barFill.style.width = (35 + Math.round(55 * (ri + 1) / regions.length)) + '%';
+      gSetStatus('Built ' + (ri+1) + ' / ' + regions.length + ': ' + region, 'info');
+      addFileRow('g-file-list', region + '.xlsx', buffer.byteLength, 'done', groupedData[region].length + ' row(s)', null);
+    }
+
+    gSetStatus('Compressing…', 'info');
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    dlBlob(zipBlob, inputFile.name.replace(/\.[^/.]+$/, '') + '.zip');
+    barFill.style.width = '100%';
+    gSetStatus('Done! ' + regions.length + ' file(s) downloaded.', 'ok');
+  } catch (err) {
+    console.error(err); gSetStatus('Error: ' + err.message, 'err'); barFill.style.width = '0%';
+  } finally { btn.disabled = false; }
+}
+
+// ─────────────────────────────────────────────────────
+// MEMBERS — v1.5
+// Sheet structure (sheet2+): from TEMPLATE ZIP
+// Sheet1 data rows:          from INPUT
+// styles.xml:                from INPUT  ← fixes lost cell colours/fonts/fills
+// sharedStrings.xml:         from INPUT  ← fixes t="s" cell values
+// ─────────────────────────────────────────────────────
+bindDropZone('m-input-zone', 'm-inputFile', 'm-inputName', () => mCheckReady());
+bindDropZone('m-tmpl-zone',  'm-templateFile', 'm-templateName', () => mCheckReady());
+
+function mCheckReady() {
+  document.getElementById('m-spreadBtn').disabled =
+    !(document.getElementById('m-inputFile').files[0] && document.getElementById('m-templateFile').files[0]);
+}
+function mClear() {
+  ['m-inputFile','m-templateFile'].forEach(id => document.getElementById(id).value = '');
+  ['m-inputName','m-templateName'].forEach(id => document.getElementById(id).textContent = '');
+  document.getElementById('m-file-list').innerHTML = '';
+  document.getElementById('m-status').textContent = '';
+  document.getElementById('m-bar-fill').style.width = '0%';
+  document.getElementById('m-spreadBtn').disabled = true;
+}
+function mSetStatus(msg, type) {
+  const el = document.getElementById('m-status');
+  el.textContent = msg; el.className = 'tool-status ' + (type || 'info');
+}
+function mSetProgress(pct) { document.getElementById('m-bar-fill').style.width = pct + '%'; }
+
+function mColToIndex(col) {
+  var n = 0;
+  for (var i = 0; i < col.length; i++) n = n * 26 + col.charCodeAt(i) - 64;
+  return n;
+}
+function mIndexToCol(n) {
+  var s = '';
+  while (n > 0) { var r = (n-1) % 26; s = String.fromCharCode(65+r) + s; n = Math.floor((n-1)/26); }
+  return s;
+}
+function mExtractSheetData(xml) {
+  var sc = xml.indexOf('<sheetData/>');
+  if (sc !== -1) return { before: xml.slice(0,sc), rows: [], after: xml.slice(sc+12) };
+  var open = xml.indexOf('<sheetData>'), close = xml.indexOf('</sheetData>');
+  if (open === -1) return { before: xml, rows: [], after: '' };
+  var inner = xml.slice(open+11, close), before = xml.slice(0,open), after = xml.slice(close+12);
+  var rows = [], re = /<row [^>]*>[\s\S]*?<\/row>/g, m;
+  while ((m = re.exec(inner)) !== null) {
+    var rM = m[0].match(/\br="(\d+)"/);
+    rows.push({ rowNum: rM ? parseInt(rM[1],10) : 0, xml: m[0] });
+  }
+  return { before, rows, after };
+}
+function mGetCellValue(rowXml, colIndex, ss) {
+  var re = /<c ([^>]*)>([\s\S]*?)<\/c>/g, m;
+  while ((m = re.exec(rowXml)) !== null) {
+    var rM = m[1].match(/\br="([A-Z]+)(\d+)"/);
+    if (!rM || mColToIndex(rM[1]) !== colIndex) continue;
+    var tM = m[1].match(/\bt="([^"]+)"/), t = tM ? tM[1] : '';
+    var vM = m[2].match(/<v>([\s\S]*?)<\/v>/), v = vM ? vM[1] : '';
+    if (t === 's') return (ss[parseInt(v,10)] || '').trim();
+    if (t === 'inlineStr') { var iM = m[2].match(/<t>([\s\S]*?)<\/t>/); return iM ? iM[1].trim() : ''; }
+    return v.trim();
+  }
+  return '';
+}
+
+// Parse shared strings array from sharedStrings.xml text
+function mParseSharedStrings(xml) {
+  var ss = [], siRe = /<si>([\s\S]*?)<\/si>/g, siM;
+  while ((siM = siRe.exec(xml)) !== null) {
+    var tRe = /<t[^>]*>([\s\S]*?)<\/t>/g, tM, txt = '';
+    while ((tM = tRe.exec(siM[1])) !== null) txt += tM[1];
+    ss.push(txt);
+  }
+  return ss;
+}
+
+// Build sharedStrings.xml from an array of strings
+function mBuildSharedStringsXml(strings) {
+  var items = strings.map(function(s) {
+    return '<si><t xml:space="preserve">' + s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</t></si>';
+  }).join('');
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+    '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="' + strings.length + '" uniqueCount="' + strings.length + '">' +
+    items + '</sst>';
+}
+
+async function mSpreadExcel() {
+  var inputFile    = document.getElementById('m-inputFile').files[0];
+  var templateFile = document.getElementById('m-templateFile').files[0];
+  if (!inputFile || !templateFile) { alert('Please upload both files first.'); return; }
+  var btn = document.getElementById('m-spreadBtn');
+  btn.disabled = true;
+  document.getElementById('m-file-list').innerHTML = '';
+  mSetProgress(5); mSetStatus('Reading files...', 'info');
+
+  try {
+    var buffers = await Promise.all([inputFile.arrayBuffer(), templateFile.arrayBuffer()]);
+    var inputZip    = await JSZip.loadAsync(buffers[0]);
+    var templateZip = await JSZip.loadAsync(buffers[1]);
+    mSetProgress(15); mSetStatus('Parsing XML...', 'info');
+
+    // ── SOURCE OF TRUTH ────────────────────────────────────────────────────
+    // INPUT  → sheet1.xml (before/after wrapper + all rows), styles.xml,
+    //          sharedStrings.xml, sheet1 _rels
+    // TEMPLATE → every OTHER file: sheet2+, workbook.xml, workbook rels,
+    //            Content_Types, theme, etc.
+    // This way: data formatting (colours/fonts/fills) is 100% from input,
+    // and extra sheets from the template survive in every output file.
+    // ──────────────────────────────────────────────────────────────────────
+
+    // Read input sheet1 + shared strings
+    var inputSheetXml = await inputZip.file('xl/worksheets/sheet1.xml').async('string');
+    var inputSSFile   = inputZip.file('xl/sharedStrings.xml');
+    var inputSS       = inputSSFile ? mParseSharedStrings(await inputSSFile.async('string')) : [];
+
+    // Parse input rows
+    var inp = mExtractSheetData(inputSheetXml);
+    if (inp.rows.length === 0) throw new Error('No rows found in input sheet');
+
+    // Find Region column index from header row
+    var headerRow = inp.rows[0], regionCol = -1;
+    var cRe = /<c ([^>]*)>[\s\S]*?<\/c>/g, cM;
+    while ((cM = cRe.exec(headerRow.xml)) !== null) {
+      var rM2 = cM[1].match(/\br="([A-Z]+)\d+"/);
+      if (!rM2) continue;
+      var ci = mColToIndex(rM2[1]);
+      if (mGetCellValue(headerRow.xml, ci, inputSS).toLowerCase() === 'region') { regionCol = ci; break; }
+    }
+    if (regionCol === -1) throw new Error("'Region' column not found in input sheet");
+    mSetProgress(25); mSetStatus('Grouping rows...', 'info');
+
+    // Group data rows by region (skip header row 0)
+    var groups = {};
+    for (var i = 1; i < inp.rows.length; i++) {
+      var reg = mGetCellValue(inp.rows[i].xml, regionCol, inputSS) || 'Unknown';
+      if (!groups[reg]) groups[reg] = [];
+      groups[reg].push(inp.rows[i]);
+    }
+    var regions = Object.keys(groups);
+    mSetProgress(35); mSetStatus('Found ' + regions.length + ' region(s)...', 'info');
+
+    // Snapshot ALL input files
+    var inputFiles = {};
+    await Promise.all(Object.keys(inputZip.files).map(async function(p) {
+      if (!inputZip.files[p].dir) inputFiles[p] = await inputZip.files[p].async('uint8array');
+    }));
+
+    // Snapshot ALL template files
+    var templateFiles = {};
+    await Promise.all(Object.keys(templateZip.files).map(async function(p) {
+      if (!templateZip.files[p].dir) templateFiles[p] = await templateZip.files[p].async('uint8array');
+    }));
+
+    mSetProgress(45);
+    var outZip = new JSZip();
+
+    for (var ri = 0; ri < regions.length; ri++) {
+      var region   = regions[ri];
+      var dataRows = groups[region];
+
+      // Build new sheet1 XML:
+      //   before/after wrapper  → from INPUT (cols widths, CF, merges, pageSetup all intact)
+      //   header row (row 1)    → from INPUT header row (preserves header cell styles)
+      //   data rows             → this region's rows from INPUT (original row numbers kept)
+      var newSheetData = '<sheetData>' + headerRow.xml;
+      for (var di = 0; di < dataRows.length; di++) newSheetData += dataRows[di].xml;
+      newSheetData += '</sheetData>';
+
+      // Recalculate dimension: find max col across header row
+      var lastRow   = dataRows.length > 0 ? dataRows[dataRows.length-1].rowNum : 1;
+      var maxColIdx = 1;
+      var cmRe2 = /\br="([A-Z]+)\d+"/g, cmM2;
+      while ((cmM2 = cmRe2.exec(headerRow.xml)) !== null) {
+        var ci2 = mColToIndex(cmM2[1]); if (ci2 > maxColIdx) maxColIdx = ci2;
+      }
+      var newSheetXml = inp.before + newSheetData + inp.after;
+      newSheetXml = newSheetXml.replace(
+        /<dimension ref="[^"]*"/,
+        '<dimension ref="A1:' + mIndexToCol(maxColIdx) + lastRow + '"'
+      );
+
+      // Build region ZIP:
+      //   Start with TEMPLATE files → brings in sheet2+, workbook.xml,
+      //   workbook rels, Content_Types, theme, etc.
+      //   Then OVERWRITE with INPUT files for sheet1 and its dependencies
+      //   (styles.xml, sharedStrings.xml, sheet1 _rels) so cell formatting
+      //   is 100% from the input.
+      var regionZip = new JSZip();
+
+      // 1. Lay down all template files first
+      for (var p in templateFiles) regionZip.file(p, templateFiles[p]);
+
+      // 2. Overwrite with input files for sheet1 data + its style dependencies.
+      //    SKIP files that register sheets — workbook.xml, workbook.xml.rels,
+      //    and [Content_Types].xml must stay from template so sheet2+ entries
+      //    are preserved. Also skip any input sheet2+ files so template extra
+      //    sheets are never clobbered.
+      var KEEP_FROM_TEMPLATE = {
+        'xl/workbook.xml': true,
+        'xl/_rels/workbook.xml.rels': true,
+        '[Content_Types].xml': true
+      };
+      for (var p in inputFiles) {
+        if (KEEP_FROM_TEMPLATE[p]) continue;               // sheet registration — template wins
+        // Skip any input worksheet or worksheet-rel for sheet2+ so the
+        // template's extra sheets are never overwritten by the input's.
+        if (/^xl\/worksheets\/sheet[2-9]\b/.test(p)) continue;
+        if (/^xl\/worksheets\/sheet[1-9][0-9]\b/.test(p)) continue;
+        if (/^xl\/worksheets\/_rels\/sheet[2-9]\.xml\.rels$/.test(p)) continue;
+        if (/^xl\/worksheets\/_rels\/sheet[1-9][0-9]\.xml\.rels$/.test(p)) continue;
+        if (p === 'xl/worksheets/sheet1.xml') {
+          regionZip.file(p, newSheetXml);                  // region-filtered sheet1
+        } else {
+          regionZip.file(p, inputFiles[p]);                 // styles, sharedStrings, rels, etc.
+        }
+      }
+
+      var buf = await regionZip.generateAsync({ type: 'uint8array', compression: 'DEFLATE' });
+      outZip.file(region + '.xlsx', new Blob([buf], { type: XLSX_MIME }));
+
+      mSetProgress(45 + Math.round(50 * (ri+1) / regions.length));
+      mSetStatus('Built ' + (ri+1) + ' / ' + regions.length + ': ' + region, 'info');
+      addFileRow('m-file-list', region + '.xlsx', buf.byteLength, 'done', dataRows.length + ' row(s)', null);
+    }
+
+    mSetStatus('Compressing...', 'info'); mSetProgress(97);
+    var zipBlob = await outZip.generateAsync({ type: 'blob' });
+    dlBlob(zipBlob, 'Region_Files.zip');
+    mSetProgress(100);
+    mSetStatus('Done! ' + regions.length + ' file(s) downloaded.', 'ok');
+
+  } catch (err) {
+    console.error(err); mSetStatus('Error: ' + err.message, 'err'); mSetProgress(0);
+  } finally { btn.disabled = false; }
+}
+
+// ─────────────────────────────────────────────────────
+// REPAIR FILES
+// ─────────────────────────────────────────────────────
+const rpDz = document.getElementById('rp-drop');
+const rpFi = document.getElementById('rp-fi');
+const rpFl = document.getElementById('rp-file-list');
+const btnRepair = document.getElementById('rp-btn-repair');
+const btnDlAll  = document.getElementById('rp-btn-dl');
+const btnClear  = document.getElementById('rp-btn-clear');
+const sTotal = document.getElementById('s-total');
+const sDone  = document.getElementById('s-done');
+const sFail  = document.getElementById('s-fail');
+const barFillRp = document.getElementById('rp-bar-fill');
+let rpFiles = [];
+
+rpDz.addEventListener('dragover',  e => { e.preventDefault(); rpDz.classList.add('over'); });
+rpDz.addEventListener('dragleave', () => rpDz.classList.remove('over'));
+rpDz.addEventListener('drop', e => { e.preventDefault(); rpDz.classList.remove('over'); rpAddFiles(e.dataTransfer.files); });
+rpFi.addEventListener('change', e => rpAddFiles(e.target.files));
+
+function rpAddFiles(list) {
+  for (const f of list) {
+    if (!f.name.match(/\.xlsx$/i)) continue;
+    if (rpFiles.find(x => x.name === f.name && x.size === f.size)) continue;
+    rpFiles.push({ file: f, name: f.name, size: f.size, status: 'pending', blob: null, info: '' });
+  }
+  rpRender();
+  btnRepair.disabled = !rpFiles.some(f => f.status === 'pending');
+}
+
+function rpRender() {
+  rpFl.innerHTML = '';
+  rpFiles.forEach((f, i) => {
+    const sc = { pending:'b-pending', working:'b-working', done:'b-done', error:'b-error' }[f.status];
+    const sl = { pending:'Pending', working:'Repairing…', done:'Repaired', error:'Error' }[f.status];
+    const row = document.createElement('div');
+    row.className = 'tool-file-row';
+    row.innerHTML = `<span class="tool-fname" title="${f.name}">📄 ${f.name}</span>
+      <span class="tool-fsize">${fmtSize(f.size)}</span>
+      ${f.info ? `<span class="tool-finfo" title="${f.info}">${f.info}</span>` : ''}
+      <span class="tool-badge ${sc}">${sl}</span>
+      ${f.status === 'done' ? `<button class="tool-dl" data-i="${i}">↓ Save</button>` : ''}`;
+    rpFl.appendChild(row);
+  });
+  document.querySelectorAll('.tool-dl').forEach(b => b.addEventListener('click', () => rpDlOne(+b.dataset.i)));
+  const done     = rpFiles.filter(f => f.status === 'done').length;
+  const fail     = rpFiles.filter(f => f.status === 'error').length;
+  const finished = rpFiles.filter(f => f.status === 'done' || f.status === 'error').length;
+  sTotal.textContent = rpFiles.length;
+  sDone.textContent  = done;
+  sFail.textContent  = fail;
+  barFillRp.style.width = rpFiles.length ? Math.round(finished / rpFiles.length * 100) + '%' : '0%';
+  btnDlAll.disabled  = done === 0;
+  btnRepair.disabled = !rpFiles.some(f => f.status === 'pending');
+}
+
+async function rpRepairOne(i) {
+  rpFiles[i].status = 'working'; rpRender();
+  try {
+    const buf = await rpFiles[i].file.arrayBuffer();
+    const zip = await JSZip.loadAsync(buf);
+    const changes = [];
+
+    const wbFile = zip.file('xl/workbook.xml');
+    if (!wbFile) throw new Error('xl/workbook.xml not found');
+    let wbXml = await wbFile.async('string');
+
+    const extNameRe = /<definedName[^>]*>[^<]*\[\d+\][^<]*<\/definedName>\s*/g;
+    const extNameCount = (wbXml.match(extNameRe) || []).length;
+    if (extNameCount) { wbXml = wbXml.replace(extNameRe, ''); changes.push(`removed ${extNameCount} external definedName(s)`); }
+
+    const refNameRe = /<definedName\b[^>]*>(?:[^<]*#REF![^<]*|#REF!)<\/definedName>\s*/g;
+    const refNameCount = (wbXml.match(refNameRe) || []).length;
+    if (refNameCount) { wbXml = wbXml.replace(refNameRe, ''); changes.push(`removed ${refNameCount} #REF! definedName(s)`); }
+
+    wbXml = wbXml.replace(/<definedNames>\s*<\/definedNames>/g, '');
+
+    const extRefCount = (wbXml.match(/<externalReference\b/g) || []).length;
+    if (extRefCount) { wbXml = wbXml.replace(/<externalReferences>[\s\S]*?<\/externalReferences>/g, ''); changes.push(`removed externalReferences block (${extRefCount} ref(s))`); }
+
+    zip.file('xl/workbook.xml', wbXml);
+
+    const wbRelsFile = zip.file('xl/_rels/workbook.xml.rels');
+    if (wbRelsFile) {
+      let wbRels = await wbRelsFile.async('string');
+      const extLinkTargets = [...wbRels.matchAll(/<Relationship[^>]*externalLink[^>]*Target="([^"]+)"[^>]*\/>/g)].map(m => m[1]);
+      const extLinkRelCount = (wbRels.match(/<Relationship[^>]*externalLink[^>]*\/>/g) || []).length;
+      if (extLinkRelCount) {
+        wbRels = wbRels.replace(/<Relationship[^>]*externalLink[^>]*\/>\s*/g, '');
+        changes.push(`removed ${extLinkRelCount} externalLink rel(s)`);
+        extLinkTargets.forEach(target => {
+          const base = target.split('/').pop();
+          zip.remove('xl/externalLinks/' + base);
+          zip.remove('xl/externalLinks/_rels/' + base + '.rels');
+        });
+        zip.remove('xl/externalLinks/');
+        zip.remove('xl/externalLinks/_rels/');
+      }
+      zip.file('xl/_rels/workbook.xml.rels', wbRels);
+    }
+
+    const ctFile = zip.file('[Content_Types].xml');
+    if (ctFile) {
+      let ctXml = await ctFile.async('string');
+      const ctCount = (ctXml.match(/<Override[^>]*externalLink[^>]*\/>/g) || []).length;
+      if (ctCount) { ctXml = ctXml.replace(/<Override[^>]*externalLink[^>]*\/>\s*/g, ''); changes.push(`removed ${ctCount} externalLink Content_Type(s)`); }
+      zip.file('[Content_Types].xml', ctXml);
+    }
+
+    const stylesFile = zip.file('xl/styles.xml');
+    const sheet1File = zip.file('xl/worksheets/sheet1.xml');
+    if (stylesFile && sheet1File) {
+      const stylesXml = await stylesFile.async('string');
+      let sheet1Xml   = await sheet1File.async('string');
+      const cellXfsMatch = stylesXml.match(/<cellXfs[^>]*>([\s\S]*?)<\/cellXfs>/);
+      if (cellXfsMatch) {
+        const xfCount = (cellXfsMatch[1].match(/<xf /g) || []).length;
+        const maxValid = xfCount - 1;
+        let styleFixCount = 0;
+        const fixedSheet = sheet1Xml.replace(/(<c [^>]*\bs=")(\d+)(")/g, (match, pre, idx, post) => {
+          if (parseInt(idx, 10) > maxValid) { styleFixCount++; return pre + '0' + post; }
+          return match;
+        });
+        if (styleFixCount > 0) {
+          zip.file('xl/worksheets/sheet1.xml', fixedSheet);
+          changes.push(`fixed ${styleFixCount} out-of-range style ref(s) in sheet1.xml`);
+        }
+      }
+    }
+
+    const outBuf = await zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE' });
+    rpFiles[i].blob   = new Blob([outBuf], { type: XLSX_MIME });
+    rpFiles[i].status = 'done';
+    rpFiles[i].info   = changes.length > 0 ? changes.join('; ') : 'no issues found';
+  } catch (e) {
+    rpFiles[i].status = 'error';
+    rpFiles[i].info   = e.message;
+  }
+  rpRender();
+}
+
+function rpDlOne(i) { const f = rpFiles[i]; if (!f.blob) return; dlBlob(f.blob, f.name); }
+
+btnRepair.addEventListener('click', async () => {
+  btnRepair.disabled = true;
+  const pending = rpFiles.map((f, i) => f.status === 'pending' ? i : -1).filter(i => i >= 0);
+  for (const i of pending) await rpRepairOne(i);
+});
+
+btnDlAll.addEventListener('click', async () => {
+  const done = rpFiles.filter(f => f.status === 'done');
+  if (done.length === 1) { rpDlOne(rpFiles.indexOf(done[0])); return; }
+  const origText = btnDlAll.innerHTML;
+  btnDlAll.textContent = 'Zipping…'; btnDlAll.disabled = true;
+  const zip = new JSZip();
+  done.forEach(f => zip.file(f.name, f.blob));
+  const blob = await zip.generateAsync({ type: 'blob' });
+  dlBlob(blob, 'repaired_files.zip');
+  btnDlAll.innerHTML = origText; btnDlAll.disabled = false;
+});
+
+btnClear.addEventListener('click', () => {
+  rpFiles = []; rpFi.value = ''; rpFl.innerHTML = '';
+  sTotal.textContent = sDone.textContent = sFail.textContent = '0';
+  barFillRp.style.width = '0%';
+  btnRepair.disabled = true; btnDlAll.disabled = true;
+});
+</script>
+</body>
+</html>
